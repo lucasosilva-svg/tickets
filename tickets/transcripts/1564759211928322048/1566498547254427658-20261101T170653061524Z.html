@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:title" content="Transcrição do Ticket">
+<meta property="og:image" content="https://images-ext-1.discordapp.net/external/c6ssoPqpdGT2lG8xIUolLczX-tqyLfhSf0PkaXoP2Ew/https/media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMml6b3I0NDJ2OGxnNmw2dHIzMWIybnNvN2J4dmZsZ20yc3c0Mzc3biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/d9QiBcfzg64Io/giphy.gif">
+<title>Transcrição do Ticket</title>
+<style>
+:root{color-scheme:dark;--bg:#313338;--panel:#2b2d31;--line:#1e1f22;--text:#dbdee1;--muted:#949ba4;--accent:#5865f2;--link:#00a8fc}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);background:linear-gradient(rgba(20,21,24,.78),rgba(20,21,24,.78)),url("https://images-ext-1.discordapp.net/external/c6ssoPqpdGT2lG8xIUolLczX-tqyLfhSf0PkaXoP2Ew/https/media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMml6b3I0NDJ2OGxnNmw2dHIzMWIybnNvN2J4dmZsZ20yc3c0Mzc3biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/d9QiBcfzg64Io/giphy.gif") center/cover fixed no-repeat var(--bg);font-family:"gg sans","Segoe UI",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.4}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+.topbar,#messages{background:rgba(43,45,49,.88);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:10px}
+.topbar{padding:16px;margin-bottom:16px}
+.topbar h1{margin:0 0 12px;font-size:22px}
+.meta{color:var(--muted);font-size:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 16px}
+.meta b{color:var(--text);font-weight:600}
+.divider{height:1px;background:var(--line);margin:14px 0}
+#messages{padding:8px 0}
+.msg{display:flex;gap:16px;padding:4px 16px;margin-top:14px}
+.msg:first-child{margin-top:4px}
+.msg:hover{background:rgba(0,0,0,.12)}
+.avatar{width:40px;height:40px;border-radius:50%;flex:none;background:var(--accent);display:grid;place-items:center;font-weight:700;color:#fff;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.body{min-width:0;flex:1}
+.head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.author{font-weight:600}
+.tag{background:var(--accent);color:#fff;font-size:10px;border-radius:4px;padding:1px 5px;text-transform:uppercase}
+.time{color:var(--muted);font-size:12px}
+.content{white-space:pre-wrap;overflow-wrap:anywhere}
+.content a,.att a{color:var(--link)}
+.att{margin-top:6px;overflow-wrap:anywhere}
+.att img{max-width:100%;max-height:320px;border-radius:6px}
+.embed{margin-top:6px;border-left:4px solid var(--accent);background:var(--line);border-radius:4px;padding:8px 12px;max-width:520px;overflow-wrap:anywhere}
+.embed b{display:block;margin-bottom:2px}
+.embed p{margin:8px 0}
+.extras{color:var(--muted);font-size:13px;margin-top:6px}
+footer{color:var(--muted);text-align:center;font-size:13px;margin:16px 0}
+@media(max-width:520px){.msg{gap:10px;padding:4px 10px}}
+</style>
+</head>
+<body><div class="wrap">
+<header class="topbar"><h1 id="title"></h1><div class="meta" id="meta"></div></header>
+<div id="messages"></div>
+<footer id="foot"></footer>
+</div>
+<script>
+const TRANSCRIPT = {"ticket": "ticket-servicos-bulba-2-7920", "server": "Nexus Bots", "opened_by": "bulba.2 (1521251206985547920)", "closed_by": "bulba.2 (1521251206985547920)", "opened_at": "2026-11-01T14:05:57.801000-03:00", "closed_at": "2026-11-01T14:06:53.061478-03:00", "duration": "55s", "messages": [{"author": "Nexus Bot", "avatar": "https://cdn.discordapp.com/avatars/1544122000543449138/dec209e387424f04eab3107a6881ce24.png?size=1024", "bot": true, "color": "", "time": "2026-11-01T14:05:58.499000-03:00", "content": "", "attachments": [], "embed": null, "buttons": [], "reactions": [], "reply": null, "edited": false}, {"author": "Buba_Jr", "avatar": "https://cdn.discordapp.com/avatars/1521251206985547920/552596eaa5adadc368c7faa287393861.png?size=1024", "bot": false, "color": "#9b59b6", "time": "2026-11-01T14:06:37.382000-03:00", "content": "teste", "attachments": [], "embed": null, "buttons": [], "reactions": [], "reply": null, "edited": false}]};
+const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+const safeUrl = value => { try { const url = new URL(value); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch { return ""; } };
+function md(raw) {
+  return esc(raw)
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+const fmt = value => { const date = new Date(value); return Number.isNaN(date.getTime()) ? esc(value) : date.toLocaleString("pt-BR", {dateStyle:"short",timeStyle:"short"}); };
+const T = TRANSCRIPT;
+document.title = "Transcrição • " + T.ticket;
+document.getElementById("title").textContent = "#" + T.ticket;
+document.getElementById("meta").innerHTML =
+  `<span>👤 ABERTO POR: <b>${esc(T.opened_by)}</b></span>` +
+  `<span>📅 CRIADO EM: <b>${fmt(T.opened_at)}</b></span>` +
+  `<span>🔒 FECHADO POR: <b>${esc(T.closed_by)}</b></span>` +
+  `<span>⏱️ TEMPO DE ATENDIMENTO: <b>${esc(T.duration)}</b></span>` +
+  `<span>Servidor: <b>${esc(T.server)}</b></span>`;
+const html = T.messages.map(message => {
+  const avatarUrl = safeUrl(message.avatar || "");
+  const avatar = avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" loading="lazy">` : esc((message.author || "?").charAt(0).toUpperCase());
+  const attachments = (message.attachments || []).map(value => {
+    const url = safeUrl(value);
+    if (!url) return "";
+    const name = esc(url.split("/").pop() || "anexo");
+    return /\.(png|jpe?g|gif|webp)(\?|$)/i.test(url)
+      ? `<div class="att"><a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(url)}" alt="anexo" loading="lazy"></a></div>`
+      : `<div class="att"><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${name}</a></div>`;
+  }).join("");
+  const embed = message.embed ? `<div class="embed">${message.embed.title ? `<b>${esc(message.embed.title)}</b>` : ""}${message.embed.description ? `<div>${md(message.embed.description)}</div>` : ""}${(message.embed.fields || []).map(field => `<p><b>${esc(field.name)}</b><br>${md(field.value)}</p>`).join("")}${message.embed.footer ? `<div class="extras">${esc(message.embed.footer)}</div>` : ""}</div>` : "";
+  const reply = message.reply ? `<div class="extras">↪ Respondendo a ${esc(message.reply.author)}: ${md(message.reply.content)}</div>` : "";
+  const buttons = (message.buttons || []).map(button => esc(button.label)).join(" · ");
+  const reactions = (message.reactions || []).map(reaction => `${esc(reaction.emoji)} ${Number(reaction.count) || 0}`).join("  ");
+  const extras = [buttons ? `Botões: ${buttons}` : "", reactions].filter(Boolean).join(" · ");
+  return `<article class="msg"><div class="avatar">${avatar}</div><div class="body"><div class="head"><span class="author">${esc(message.author)}</span>${message.bot ? '<span class="tag">BOT</span>' : ""}<span class="time">${fmt(message.time)}</span>${message.edited ? '<span class="time">(editada)</span>' : ""}</div>${message.content ? `<div class="content">${md(message.content)}</div>` : ""}${attachments}${embed}${reply}${extras ? `<div class="extras">${extras}</div>` : ""}</div></article>`;
+}).join("");
+document.getElementById("messages").innerHTML = html;
+document.getElementById("foot").textContent = T.messages.length + " mensagens";
+</script>
+</body></html>
