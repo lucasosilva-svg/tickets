@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transcrição do Ticket</title>
+<style>
+  :root{
+    --bg:#313338; --bg2:#2b2d31; --bg3:#1e1f22; --hover:rgba(2,2,2,.06);
+    --text:#dbdee1; --head:#f2f3f5; --muted:#949ba4; --blurple:#5865f2;
+    --link:#00a8fc; --mention-bg:rgba(88,101,242,.3); --mention:#c9cdfb;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{min-height:100vh;color:var(--text);
+       font-family:"gg sans","Noto Sans","Segoe UI",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.375;
+       background:var(--bg)}
+  .app{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+
+  /* barra do canal */
+  .topbar{position:sticky;top:0;z-index:5;height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;
+          background:var(--bg);border-bottom:1px solid var(--bg3);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+  .topbar svg{flex:none;color:var(--muted)}
+  .topbar .name{color:var(--head);font-weight:600}
+  .topbar .sep{width:1px;height:24px;background:#3f4147}
+  .topbar .topic{color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* mensagens */
+  #messages{padding:0 0 12px;flex:1}
+  .welcome{padding:16px 16px 8px}
+  .welcome .ico{width:68px;height:68px;border-radius:50%;background:#41434a;display:grid;place-items:center;color:#fff;margin-bottom:8px}
+  .welcome h2{margin:0 0 6px;font-size:32px;color:var(--head)}
+  .welcome p{margin:0;color:var(--muted);font-size:15px}
+  .info{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;padding:10px 12px;background:var(--bg2);border-radius:8px;font-size:14px;color:var(--muted)}
+  .info b{color:var(--head);font-weight:600}
+
+  .divider{display:flex;align-items:center;margin:18px 16px 6px;color:var(--muted);font-size:12px;font-weight:600}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:#3f4147}
+  .divider span{padding:0 8px}
+
+  .msg{position:relative;padding:2px 48px 2px 72px;min-height:22px}
+  .msg:hover{background:var(--hover)}
+  .msg.first{margin-top:17px;padding-top:2px}
+  .msg .avatar{position:absolute;left:16px;top:4px;width:40px;height:40px;border-radius:50%;
+               display:grid;place-items:center;font-weight:700;color:#fff;overflow:hidden;user-select:none}
+  .msg .avatar img{width:100%;height:100%;object-fit:cover}
+  .msg .stamp{position:absolute;left:0;width:56px;text-align:right;top:3px;font-size:11px;color:var(--muted);visibility:hidden}
+  .msg:hover .stamp{visibility:visible}
+  .head{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+  .author{font-weight:500;color:var(--head)}
+  .tag{background:var(--blurple);color:#fff;font-size:10px;font-weight:500;border-radius:3px;padding:0 4px;line-height:15px;height:15px;align-self:center;text-transform:uppercase;display:inline-flex;align-items:center;gap:2px}
+  .time{color:var(--muted);font-size:12px;font-weight:500}
+  .content{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+  .content a,.embed a{color:var(--link);text-decoration:none}
+  .content a:hover,.embed a:hover{text-decoration:underline}
+  .content code,.embed code{background:#1e1f22;border-radius:4px;padding:1px 5px;font:14px/1.2 Consolas,"Courier New",monospace}
+  .content pre{margin:6px 0;background:#2b2d31;border:1px solid #1e1f22;border-radius:4px;padding:8px;font:14px/1.3 Consolas,"Courier New",monospace;white-space:pre-wrap;overflow-x:auto}
+  .content blockquote{margin:2px 0;padding:0 8px 0 12px;border-left:4px solid #4e5058}
+  .mention{background:var(--mention-bg);color:var(--mention);border-radius:3px;padding:0 2px;font-weight:500}
+  .mention:hover{background:var(--blurple);color:#fff}
+  .edited{color:var(--muted);font-size:10px}
+
+  /* títulos do markdown (#, ##, ###) */
+  .h1{font-size:1.4em;font-weight:700;color:var(--head);margin:2px 0 4px}
+  .h2{font-size:1.2em;font-weight:700;color:var(--head);margin:2px 0 4px}
+  .h3{font-size:1.05em;font-weight:700;color:var(--head);margin:2px 0 4px}
+
+  /* resposta */
+  .reply{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);margin:0 0 2px;position:relative;padding-left:0;height:20px}
+  .msg.has-reply{margin-top:17px}
+  .msg.has-reply .avatar{top:24px}
+  .reply::before{content:"";position:absolute;left:-56px;top:50%;width:33px;height:10px;border-left:2px solid #4e5058;border-top:2px solid #4e5058;border-top-left-radius:6px}
+  .reply .ra{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:700;color:#fff;flex:none}
+  .reply .rn{font-weight:500;color:#c4c9ce}
+  .reply .rc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* anexos */
+  .att{margin-top:4px}
+  .att img{max-width:min(400px,100%);max-height:300px;border-radius:6px;display:block}
+  .att-error{display:block;color:var(--muted);font-size:12px}
+  .file{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:6px;padding:10px 12px;max-width:400px}
+
+  /* embed */
+  .embed{display:block;margin-top:6px;max-width:520px;background:var(--bg2);border:1px solid rgba(0,0,0,.25);border-left:4px solid var(--blurple);border-radius:4px;padding:8px 16px 16px 12px}
+  .embed .et{font-weight:600;color:var(--head);margin-top:8px}
+  .embed .ed{font-size:14px;margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .embed .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+  .embed .fn{font-weight:600;font-size:14px;color:var(--head)}
+  .embed .fv{font-size:14px;white-space:pre-wrap}
+  .embed .ef{margin-top:8px;font-size:12px;color:var(--muted)}
+  .embed .ea{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--head)}
+  .embed .ea img,.embed .thumb{width:24px;height:24px;object-fit:cover;border-radius:50%}
+  .embed .et a{color:inherit}
+  .embed .thumb{float:right;width:80px;height:80px;border-radius:4px;margin:0 0 8px 12px}
+  .embed .image{display:block;width:100%;max-width:480px;max-height:360px;object-fit:contain;margin-top:8px;border-radius:4px}
+  .embed .ets{margin-top:8px;font-size:12px;color:var(--muted)}
+
+  /* botões e reações */
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .btn{font:500 14px/16px inherit;font-family:inherit;border:0;border-radius:3px;padding:2px 16px;height:32px;color:#fff;background:#4e5058;display:inline-flex;align-items:center;gap:6px;cursor:default}
+  .btn.primary{background:var(--blurple)} .btn.success{background:#248046} .btn.danger{background:#da373c}
+  .reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+  .react{display:inline-flex;align-items:center;gap:6px;background:#2b2d31;border:1px solid transparent;border-radius:8px;padding:0 6px;height:24px;font-size:14px;color:#b5bac1}
+
+  /* barra inferior */
+  .bottom{padding:0 16px 16px;margin-top:8px}
+  .input{display:flex;align-items:center;gap:10px;background:#383a40;border-radius:8px;padding:11px 16px;color:#6d6f78;cursor:not-allowed}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin:0;padding:0 0 20px;background:var(--bg)}
+
+  @media(max-width:560px){.msg{padding-right:12px;padding-left:64px}.msg .avatar{left:12px}.topbar .topic,.topbar .sep{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.3010 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11338 21 6.87095 21H5.88657ZM9.41001 9L8.35001 15H14.35L15.41 9H9.41001Z"/></svg>
+    <span class="name" id="chname">ticket</span>
+    <span class="sep"></span>
+    <span class="topic" id="topic"></span>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="bottom">
+    <div class="input">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17 11V7a5 5 0 0 0-10 0v4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM9 7a3 3 0 0 1 6 0v4H9V7z"/></svg>
+      <span>Esta é uma transcrição arquivada — somente leitura</span>
+    </div>
+  </div>
+</div>
+<footer id="foot"></footer>
+
+<script>
+/* ===== DADOS DA TRANSCRIÇÃO =====
+   O bot substitui este objeto pelos dados reais do ticket.
+   Campos opcionais por mensagem: color, avatar, bot, reply, attachments, embed, buttons, reactions, edited */
+const TRANSCRIPT = {"ticket": "ticket-parceria-bulba-2-7920", "server": "Nexus Bots", "opened_by": "bulba.2 (1521251206985547920)", "closed_by": "bulba.2 (1521251206985547920)", "opened_at": "2026-11-03T20:00:25.117000-03:00", "closed_at": "2026-11-03T20:00:45.917292-03:00", "duration": "20s", "messages": [{"author": "Nexus Bot", "avatar": "https://cdn.discordapp.com/avatars/1544122000543449138/dec209e387424f04eab3107a6881ce24.png?size=1024", "bot": true, "color": "", "time": "2026-11-03T20:00:25.468000-03:00", "content": "", "attachments": [], "embeds": [], "buttons": [], "reactions": [], "reply": null, "edited": false}, {"author": "Buba_Jr", "avatar": "https://cdn.discordapp.com/avatars/1521251206985547920/552596eaa5adadc368c7faa287393861.png?size=1024", "bot": false, "color": "#9b59b6", "time": "2026-11-03T20:00:30.363000-03:00", "content": "teste", "attachments": [], "embeds": [], "buttons": [], "reactions": [], "reply": null, "edited": false}]};
+
+/* ===== utilidades ===== */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PAL = ["#5865f2","#3ba55d","#faa61a","#ed4245","#eb459e","#00a8fc","#9b59b6","#1abc9c"];
+const colorOf = n => { let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return PAL[h % PAL.length]; };
+const safeColor = c => /^#[0-9a-f]{3,8}$/i.test(c || "") ? c : "";
+const day = d => d.toLocaleDateString("pt-BR", {day:"numeric", month:"long", year:"numeric"});
+const hm  = d => d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+const full = d => d.toLocaleDateString("pt-BR") + " " + hm(d);
+
+function md(raw){
+  let s = esc(raw), blocks = [];
+  s = s.replace(/```(?:\w+\n)?([\s\S]*?)```/g, (_, c) => { blocks.push(c.replace(/^\n|\n$/g, "")); return "\u0000" + (blocks.length - 1) + "\u0000"; });
+  s = s.replace(/^(#{1,3}) (.+)\n?/gm, (_, h, t) => `<div class="h${h.length}">${t}</div>`)
+       .replace(/^- (.+)$/gm, "• $1")
+       .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+       .replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>")
+       .replace(/__([^_\n]+)__/g, "<u>$1</u>")
+       .replace(/\*([^*\n]+)\*/g, "<i>$1</i>")
+       .replace(/~~([^~\n]+)~~/g, "<s>$1</s>")
+       .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+       .replace(/(^|[\s>])([@#][\wÀ-ÿ.-]+)/g, '$1<span class="mention">$2</span>')
+       .replace(/^&gt; (.*)$/gm, "<blockquote>$1</blockquote>")
+       .replace(/<\/blockquote>\n/g, "</blockquote>");
+  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => "<pre>" + blocks[i] + "</pre>");
+}
+
+function avatar(m, cls){
+  const n = m.author || "?";
+  return m.avatar
+    ? `<img src="${esc(m.avatar)}" alt="" loading="lazy">`
+    : esc(n.charAt(0).toUpperCase());
+}
+
+function embed(e){
+  const fields = (e.fields || []).map(f => `<div><div class="fn">${esc(f.name)}</div><div class="fv">${md(f.value)}</div></div>`).join("");
+  const author = e.author ? `<div class="ea">${e.author.icon_url ? `<img src="${esc(e.author.icon_url)}" alt="" loading="lazy">` : ""}${e.author.url ? `<a href="${esc(e.author.url)}" target="_blank" rel="noopener noreferrer">${esc(e.author.name)}</a>` : esc(e.author.name)}</div>` : "";
+  const title = e.title ? `<div class="et">${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.title)}</a>` : esc(e.title)}</div>` : "";
+  const thumbnail = e.thumbnail ? `<img class="thumb" src="${esc(e.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
+  const image = e.image ? `<img class="image" src="${esc(e.image)}" alt="Imagem do embed" loading="lazy" onerror="this.style.display='none'">` : "";
+  const footer = e.footer ? `<div class="ef">${e.footer.icon_url ? `<img src="${esc(e.footer.icon_url)}" alt="" width="16" height="16" loading="lazy" onerror="this.style.display='none'"> ` : ""}${esc(e.footer.text)}</div>` : "";
+  const timestamp = e.timestamp ? `<div class="ets">${full(new Date(e.timestamp))}</div>` : "";
+  return `<div class="embed" style="border-left-color:${safeColor(e.color) || "#5865f2"}">
+    ${author}
+    ${thumbnail}
+    ${title}
+    ${e.description ? `<div class="ed">${md(e.description)}</div>` : ""}
+    ${fields ? `<div class="fields">${fields}</div>` : ""}
+    ${image}
+    ${footer}
+    ${timestamp}
+  </div>`;
+}
+
+/* ===== render ===== */
+const T = TRANSCRIPT;
+const opened = new Date(T.opened_at), closed = new Date(T.closed_at);
+document.title = "Transcrição • " + T.ticket;
+document.getElementById("chname").textContent = T.ticket;
+document.getElementById("topic").textContent = T.server + " • " + full(opened) + " → " + full(closed);
+
+let html = `<div class="welcome">
+  <div class="ico"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.3010 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11338 21 6.87095 21H5.88657ZM9.41001 9L8.35001 15H14.35L15.41 9H9.41001Z"/></svg></div>
+  <h2>Bem-vindo ao #${esc(T.ticket)}!</h2>
+  <p>Este é o início da transcrição do ticket.</p></div>`;
+
+let prev = null, prevDay = "";
+for (const m of T.messages){
+  const d = new Date(m.time), dd = day(d);
+  if (dd !== prevDay){ html += `<div class="divider"><span>${dd}</span></div>`; prevDay = dd; prev = null; }
+  const group = prev && prev.author === m.author && !m.reply && (d - new Date(prev.time)) < 7 * 60000;
+  const col = safeColor(m.color);
+  const avBg = col || colorOf(m.author);
+  const reply = m.reply ? `<div class="reply">
+      <span class="ra" style="background:${colorOf(m.reply.author)}">${esc(m.reply.author.charAt(0).toUpperCase())}</span>
+      <span class="rn">@${esc(m.reply.author)}</span><span class="rc">${esc(m.reply.content)}</span></div>` : "";
+  const atts = (m.attachments || []).map(a => {
+    const url = typeof a === "string" ? a : (a.url || "");
+    const name = typeof a === "string" ? url.split("/").pop().split("?")[0] : (a.name || "arquivo");
+    const contentType = typeof a === "string" ? "" : (a.content_type || "");
+    const isImage = contentType.startsWith("image/") || url.startsWith("data:image/") || /\.(png|jpe?g|gif|webp|bmp)(\?|#|$)/i.test(name);
+    if (isImage) {
+      const image = `<img src="${esc(url)}" alt="${esc(name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.hidden=false"><span class="att-error" hidden>Imagem indisponível</span>`;
+      return `<div class="att">${url.startsWith("data:") ? image : `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${image}</a>`}</div>`;
+    }
+    return `<div class="att"><div class="file">📄 <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(name)}</a></div></div>`;
+  }).join("");
+  const btns = (m.buttons || []).length ? `<div class="btns">${m.buttons.map(b => `<span class="btn ${esc(b.style || "")}">${esc(b.label)}</span>`).join("")}</div>` : "";
+  const reacts = (m.reactions || []).length ? `<div class="reactions">${m.reactions.map(r => `<span class="react">${esc(r.emoji)} ${esc(r.count)}</span>`).join("")}</div>` : "";
+  const embeds = m.embeds || (m.embed ? [m.embed] : []);
+  const renderedEmbeds = embeds.map(embed).join("");
+  const body = `${m.content ? `<div class="content">${md(m.content)}${m.edited ? ' <span class="edited">(editada)</span>' : ""}</div>` : ""}${atts}${renderedEmbeds}${btns}${reacts}`;
+
+  if (group){
+    html += `<div class="msg"><span class="stamp">${hm(d)}</span><div>${body}</div></div>`;
+  } else {
+    html += `<div class="msg first${m.reply ? " has-reply" : ""}">
+      <div class="avatar" style="background:${avBg}">${avatar(m)}</div>
+      ${reply}
+      <div class="head"><span class="author"${col ? ` style="color:${col}"` : ""}>${esc(m.author)}</span>${m.bot ? '<span class="tag">✔ BOT</span>' : ""}<span class="time">${full(d)}</span></div>
+      ${body}</div>`;
+  }
+  prev = m;
+}
+document.getElementById("messages").innerHTML = html;
+document.getElementById("foot").textContent = "Transcrição gerada em " + full(new Date());
+</script>
+</body>
+</html>
